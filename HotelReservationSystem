@@ -1,0 +1,215 @@
+Source Code:
+
+
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
+
+class Hotel {
+    private String name;
+    private List<Room> rooms;
+
+    public Hotel(String name) {
+        this.name = name;
+        this.rooms = new ArrayList<>();
+    }
+
+    public void addRoom(Room room) {
+        rooms.add(room);
+    }
+
+    public List<Room> getRooms() {
+        return rooms;
+    }
+
+    public List<Room> getAvailableRooms() {
+        List<Room> availableRooms = new ArrayList<>();
+        for (Room room : rooms) {
+            if (!room.isBooked()) {
+                availableRooms.add(room);
+            }
+        }
+        return availableRooms;
+    }
+
+    public void makeReservation(Room room, String guestName) {
+        room.setBooked(true);
+        room.setGuestName(guestName);
+        System.out.println("Reservation made for " + guestName + " in room " + room.getRoomNumber());
+    }
+
+    public void viewBookingDetails(Room room) {
+        System.out.println("Room Number: " + room.getRoomNumber());
+        System.out.println("Guest Name: " + room.getGuestName());
+        System.out.println("Room Type: " + room.getRoomType());
+        System.out.println("Price: " + room.getPrice());
+    }
+}
+
+class Room {
+    private int roomNumber;
+    private String roomType;
+    private double price;
+    private boolean booked;
+    private String guestName;
+
+    public Room(int roomNumber, String roomType, double price) {
+        this.roomNumber = roomNumber;
+        this.roomType = roomType;
+        this.price = price;
+        this.booked = false;
+    }
+
+    public int getRoomNumber() {
+        return roomNumber;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public boolean isBooked() {
+        return booked;
+    }
+
+    public void setBooked(boolean booked) {
+        this.booked = booked;
+    }
+
+    public String getGuestName() {
+        return guestName;
+    }
+
+    public void setGuestName(String guestName) {
+        this.guestName = guestName;
+    }
+
+    @Override
+    public String toString() {
+        return "Room Number: " + roomNumber + ", Room Type: " + roomType + ", Price: " + price;
+    }
+}
+
+class PaymentProcessor {
+    public void processPayment(double amount) {
+        System.out.println("Payment of $" + amount + " processed successfully");
+    }
+}
+
+public class HotelReservationSystem {
+    private Hotel hotel;
+    private PaymentProcessor paymentProcessor;
+
+    public HotelReservationSystem(Hotel hotel, PaymentProcessor paymentProcessor) {
+        this.hotel = hotel;
+        this.paymentProcessor = paymentProcessor;
+    }
+
+    public void searchAvailableRooms() {
+        List<Room> availableRooms = hotel.getAvailableRooms();
+        System.out.println("Available Rooms:");
+        for (Room room : availableRooms) {
+            System.out.println(room.toString());
+            System.out.println();
+        }
+    }
+
+    public void makeReservation() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter room number: ");
+        int roomNumber;
+        try {
+            roomNumber = scanner.nextInt();
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input. Please enter a valid room number.");
+            return;
+        }
+
+        System.out.print("Enter guest name: ");
+        String guestName = scanner.next();
+
+        Room room = findRoom(roomNumber);
+        if (room != null) {
+            hotel.makeReservation(room, guestName);
+            paymentProcessor.processPayment(room.getPrice());
+        } else {
+            System.out.println("Room not found");
+        }
+    }
+
+    public void viewBookingDetails() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter room number: ");
+        int roomNumber;
+        try {
+            roomNumber = scanner.nextInt();
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input. Please enter a valid room number.");
+            return;
+        }
+
+        Room room = findRoom(roomNumber);
+        if (room != null) {
+            hotel.viewBookingDetails(room);
+        } else {
+            System.out.println("Room not found");
+        }
+    }
+
+    private Room findRoom(int roomNumber) {
+        for (Room room : hotel.getRooms()) {
+            if (room.getRoomNumber() == roomNumber) {
+                return room;
+            }
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Hotel hotel = new Hotel("Grand Hotel");
+        hotel.addRoom(new Room(101, "Single", 100.0));
+        hotel.addRoom(new Room(102, "Double", 150.0));
+        hotel.addRoom(new Room(103, "Suite", 250.0));
+
+        PaymentProcessor paymentProcessor = new PaymentProcessor();
+        HotelReservationSystem hotelReservationSystem = new HotelReservationSystem(hotel, paymentProcessor);
+
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("1. Search available rooms");
+            System.out.println("2. Make reservation");
+            System.out.println("3. View booking details");
+            System.out.println("4. Exit");
+            System.out.print("Enter choice: ");
+            int choice;
+            try {
+                choice = scanner.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a valid choice.");
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    hotelReservationSystem.searchAvailableRooms();
+                    break;
+                case 2:
+                    hotelReservationSystem.makeReservation();
+                    break;
+                case 3:
+                    hotelReservationSystem.viewBookingDetails();
+                    break;
+                case 4:
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
+    }
+}
